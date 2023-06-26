@@ -9,12 +9,12 @@ class Tag(models.Model):
     name = models.CharField(
         verbose_name='Название',
         unique=True,
-        max_length=50,
+        max_length=200,
     )
     slug = models.SlugField(
         verbose_name='Ссылка',
         unique=True,
-        max_length=50
+        max_length=200
     )
     hexcolor = models.CharField(
         verbose_name='Цветовой HEX-код',
@@ -38,43 +38,51 @@ class Tag(models.Model):
         return self.id
 
 
-class Ingredients(models.Model):
+class Ingredient(models.Model):
     name = models.CharField(
+        max_length=200,
         verbose_name='Название',
     )
-    measure = models.CharField(
+    measurement_unit = models.CharField(
+        max_length=200,
         verbose_name='Единицы измерения',
     )
 
     class Meta:
         verbose_name = 'Ингридиент',
         verbose_name_plural = 'Ингридиенты'
-        ordering = ('id',)
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
 
 
-class Recipes(models.Model):
+class Recipe(models.Model):
     author = models.ForeignKey(
         User,
-        related_name='recepes',
         verbose_name='Автор публикации',
+        related_name='recipes',
         on_delete=models.CASCADE
     )
     name = models.CharField(
-        verbose_name='Название', max_length=200
+        verbose_name='Название',
+        max_length=200
     )
     image = models.ImageField(
-        verbose_name='Картинка', upload_to='photo_recipes/', null=True
+        verbose_name='Картинка',
+        upload_to='photo/recipes/',
+        null=True,
+        default=None,
     )
-    description = models.TextField(verbose_name='Текстовое описание')
+    description = models.TextField(
+        verbose_name='Текстовое описание',
+    )
     tag = models.ManyToManyField(
         Tag,
-        related_name='tag',
         verbose_name='Тэг',
+        related_name='tag',
     )
-    time = models.PositiveSmallIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         validators=(MinValueValidator(
             1,
             message='Укажите время!',
@@ -82,9 +90,14 @@ class Recipes(models.Model):
         verbose_name='Время приготовления',
     )
     ingredients = models.ManyToManyField(
-        Ingredients,
+        Ingredient,
+        through='IngredientInRecipe',
         related_name='ingredients',
         verbose_name='Ингридиенты',
+    )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата публикации',
     )
 
     class Meta:
@@ -96,7 +109,7 @@ class Recipes(models.Model):
         return self.name
 
 
-class Favorites(models.Model):
+class Favorite(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -104,30 +117,51 @@ class Favorites(models.Model):
         verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
         on_delete=models.CASCADE,
         related_name='favorites',
         verbose_name='Избранный рецепт',
     )
 
     def __str__(self):
-        return f'Рецепт {self.recipe} у вас в избранном'
+        return f'Рецепт {self.recipe} в избранном у {self.user}'
 
 
-class IngredientsInRecipe(models.Model):
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='shopping_list',
+        verbose_name='Пользователь'
+    )
     recipe = models.ForeignKey(
-        Recipes,
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='in_shopping_list',
+        verbose_name='Рецепт'
+    )
+
+    class Meta:
+        verbose_name = 'список покупок'
+
+    def __str__(self):
+        return f'Рецепт {self.recipe} в списке покупок у {self.user}'
+
+
+class IngredientInRecipe(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
         on_delete=models.CASCADE,
         related_name='recipe_with',
         verbose_name='Рецепт',
     )
     ingredient = models.ForeignKey(
-        Ingredients,
+        Ingredient,
         on_delete=models.CASCADE,
         related_name='in_recipe',
         verbose_name='Ингридиент',
     )
-    quantity = models.PositiveSmallIntegerField(
+    amount = models.PositiveSmallIntegerField(
         validators=(MinValueValidator(
             1,
             message='Укажите количество!',
