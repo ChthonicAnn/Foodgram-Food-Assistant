@@ -6,20 +6,20 @@ from .models import (
 )
 
 
-class PostAdmin(admin.ModelAdmin):
-    # Перечисляем поля, которые должны отображаться в админке
-    list_display = ('pk', 'text', 'pub_date', 'author')
-    # Добавляем интерфейс для поиска по тексту постов
-    search_fields = ('text',)
-    # Добавляем возможность фильтрации по дате
-    list_filter = ('pub_date',)
-    # Это свойство сработает для всех колонок: где пусто — там будет эта строка
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'author',)
+    list_filter = ('name', 'author', 'tags',)
     empty_value_display = '-пусто-'
 
 
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('name', 'measurement_unit',)
+    list_filter = ('name',)
+
+
 admin.site.register(Favorite)
-admin.site.register(Ingredient)
+admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(IngredientInRecipe)
-admin.site.register(Recipe)
+admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(ShoppingCart)
 admin.site.register(Tag)

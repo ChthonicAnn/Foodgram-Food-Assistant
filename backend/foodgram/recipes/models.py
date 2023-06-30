@@ -30,12 +30,12 @@ class Tag(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Тэг',
-        verbose_name_plural = 'Тэги'
+        verbose_name = 'Тег',
+        verbose_name_plural = 'Теги'
         ordering = ('id',)
 
     def __str__(self):
-        return self.id
+        return self.name
 
 
 class Ingredient(models.Model):
@@ -49,9 +49,9 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Ингридиент',
-        verbose_name_plural = 'Ингридиенты'
-        ordering = ('name',)
+        verbose_name = 'Ингредиент',
+        verbose_name_plural = 'Ингредиенты'
+        ordering = ('id',)
 
     def __str__(self):
         return self.name
@@ -74,12 +74,12 @@ class Recipe(models.Model):
         null=True,
         default=None,
     )
-    description = models.TextField(
+    text = models.TextField(
         verbose_name='Текстовое описание',
     )
-    tag = models.ManyToManyField(
+    tags = models.ManyToManyField(
         Tag,
-        verbose_name='Тэг',
+        verbose_name='Тег',
         related_name='tag',
     )
     cooking_time = models.PositiveSmallIntegerField(
@@ -93,7 +93,7 @@ class Recipe(models.Model):
         Ingredient,
         through='IngredientInRecipe',
         related_name='ingredients',
-        verbose_name='Ингридиенты',
+        verbose_name='Ингредиенты',
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
@@ -123,6 +123,10 @@ class Favorite(models.Model):
         verbose_name='Избранный рецепт',
     )
 
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
+
     def __str__(self):
         return f'Рецепт {self.recipe} в избранном у {self.user}'
 
@@ -142,13 +146,16 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        verbose_name = 'список покупок'
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
 
     def __str__(self):
         return f'Рецепт {self.recipe} в списке покупок у {self.user}'
 
 
 class IngredientInRecipe(models.Model):
+    """Модель связи между рецептами и ингредиентами.
+    Добавляет количество ингридиентов."""
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -159,7 +166,7 @@ class IngredientInRecipe(models.Model):
         Ingredient,
         on_delete=models.CASCADE,
         related_name='in_recipe',
-        verbose_name='Ингридиент',
+        verbose_name='Ингрeдиент',
     )
     amount = models.PositiveSmallIntegerField(
         validators=(MinValueValidator(
@@ -169,5 +176,9 @@ class IngredientInRecipe(models.Model):
         verbose_name=('Количество'),
     )
 
+    class Meta:
+        verbose_name = 'Ингредиент в рецепте',
+        verbose_name_plural = 'Ингредиенты в рецептах'
+
     def __str__(self):
-        return f'Рецепт {self.recipe} у вас в избранном'
+        return f'{self.ingredient} добавлен в рецепт {self.recipe}'

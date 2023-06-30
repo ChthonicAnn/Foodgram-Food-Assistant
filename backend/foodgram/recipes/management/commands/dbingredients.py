@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         file_path = options['path'] + 'ingredients.csv'
-        with open(file_path, 'r') as csv_file:
+        with open(file_path, 'r', encoding='utf=8') as csv_file:
             reader = csv.reader(csv_file)
 
             for row in reader:
@@ -28,3 +28,5 @@ class Command(BaseCommand):
                         )
                 except Exception as error:
                     print(f'Ошибка в строке {row}: {error}')
+
+# encoding='utf=8'

@@ -22,7 +22,7 @@ from recipes.models import (
 
 from .serializers import (
     FavoriteSerializer, IngredientShowSerializer,
-    RecipeCreateSerializer, RecipeShowSerializer,
+    RecipeCreateSerializer, RecipeShortSerializer, RecipeShowSerializer,
     ShoppingCartSerializer, TagSerializer
 )
 
@@ -35,7 +35,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = CustomPagination
-    permission_classes = IsAdminOrAuthorOrReadOnly
+    permission_classes = (IsAdminOrAuthorOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action in (['retrieve', 'list']):
@@ -59,18 +59,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if not model_create.exists():
                 if request.user != author:
                     model.objects.create(
-                        author=request.user,
+                        user=request.user,
                         recipe=recipe
                     )
-                    serializer = serializer()
-                    return Response(serializer.data)
-            raise Response(status=status.HTTP_204_NO_CONTENT)
+                    serializer = RecipeShortSerializer(recipe=recipe)
+                    return Response(
+                        serializer.data,
+                        status=status.HTTP_201_CREATED,
+                    )
+            return Response({'errors': f'Этот рецепт уже добавлен в {model}'},
+                            status=status.HTTP_204_NO_CONTENT,
+                            )
 
         if self.request.method == 'DELETE':
             model_delete = model.objects.filter(user=user, recipe=recipe)
             if model_delete.exists():
                 model_delete.delete()
-            raise Response(status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'errors': 'Рецепт успешно удален из избранного'},
+                    status=status.HTTP_201_CREATED,
+                    )
+            else:
+                return Response({'errors': 'Этот рецепт уже удалён'},
+                                status=status.HTTP_400_BAD_REQUEST,
+                                )
 
     @action(detail=True, methods=('post', 'delete'), url_path='favorite',
             permission_classes=[IsAuthenticated],)
@@ -113,7 +125,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для ингридиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientShowSerializer
-    filter_backends = (filters.SearchFilter)
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('^name',)
     permission_classes = (IsAdminOrReadOnly,)
 

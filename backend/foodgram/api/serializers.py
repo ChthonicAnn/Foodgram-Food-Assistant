@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 # from django.shortcuts import get_object_or_404
 from django.core.validators import MinValueValidator
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 # from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
@@ -50,7 +51,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientShowSerializer(serializers.ModelSerializer):
-    """Вывод ингредиентов по запросу."""
+    """Вывод ингредиентов по GET-запросу."""
     class Meta:
         fields = ('id', 'name', 'measurement_unit')
         model = Ingredient
@@ -69,14 +70,19 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
         model = IngredientInRecipe
 
 
-class IngredientRecipeSerializer(serializers.ModelSerializer):
+class IngredientAddToRecipeSerializer(serializers.Serializer):
     """Сохраняет количество ингредиентов в рецепте."""
-    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.IntegerField()
+    amount = serializers.IntegerField(min_value=0)
+    id = serializers.IntegerField()
+    # id = serializers.PrimaryKeyRelatedField(
+    #     queryset=Ingredient.objects.all(), validators=[
+    #         UniqueValidator(queryset=Ingredient.objects.all())
+    #     ]
+    # )
 
-    class Meta:
-        model = IngredientInRecipe
-        fields = ('id', 'amount')
+    # class Meta:
+    #     model = IngredientInRecipe
+    #     fields = ('id', 'amount')
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
@@ -89,10 +95,13 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     """Создаёт и редактирует рецепты."""
-    ingredients = IngredientInRecipeSerializer(many=True)
-    tags = TagSerializer(many=True)
+    ingredients = IngredientAddToRecipeSerializer(many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True
+        )
     image = Base64ImageField(required=False, allow_null=True)
-    author = CustomUserSerializer(read_only=True)
+    # author = CustomUserSerializer(read_only=True)
     cooking_time = serializers.IntegerField(
         validators=(MinValueValidator(
             1,
@@ -103,24 +112,19 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         fields = ('ingredients', 'tags', 'image',
                   'name', 'text', 'cooking_time'
                   )
+        read_only_fields = ('author',)
         model = Recipe
 
     def create_ingredients(self, ingredients, recipe):
-        # for ingredient in ingredients:
-        #     current_ingredient = Ingredient.objects.get(
-        #         **ingredient)
-        #     IngredientInRecipe.objects.create(
-        #         achievement=current_ingredient, recipe=recipe)
-
         create_ingredient = [
             IngredientInRecipe(
                 recipe=recipe,
-                ingredient=ingredient['id'],
-                amount=ingredient['amount']
+                amount=ingredient.get("amount", 15),
+                ingredient=get_object_or_404(Ingredient, id=ingredient["id"]),
+                # ingredient_id=ingredient.get('id'),
                 )
             for ingredient in ingredients
-            ]
-
+        ]
         IngredientInRecipe.objects.bulk_create(create_ingredient)
 
     def create_tags(self, tags, recipe):
@@ -134,13 +138,10 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         author = validated_data.pop('author')
         recipe = Recipe.objects.create(author=author, **validated_data)
         self.create_tags(tags, recipe)
-        self.create_ingredients(ingredients, recipe)
-
         for ingredient in ingredients:
-            current_ingredient = Ingredient.objects.get(
-                **ingredient)
-            IngredientInRecipe.objects.create(
-                achievement=current_ingredient, recipe=recipe)
+            print(ingredient)
+        # print(ingredients)
+        self.create_ingredients(ingredients, recipe)
 
         return recipe
 
@@ -253,12 +254,12 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username',
-        default=serializers.CurrentUserDefault()
+        default=serializers.CurrentUserDefault(),
     )
 
     author = serializers.SlugRelatedField(
         slug_field='username',
-        queryset=User.objects.all()
+        queryset=User.objects.all(),
     )
 
     class Meta:
@@ -268,7 +269,7 @@ class SubscriptionsSerializer(serializers.ModelSerializer):
             UniqueTogetherValidator(
                 queryset=Subscriptions.objects.all(),
                 message='Вы уже подписаны на этого автора!',
-                fields=['user__author']
+                fields=['user__author'],
             ),
         )
 
