@@ -3,16 +3,19 @@ from django.contrib.auth import get_user_model
 # from django.contrib.auth.models import User
 # from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
+from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from rest_framework.validators import UniqueValidator
 
-from api.serializers import RecipeShortSerializer
-from users.models import Subscriptions
+# from api.serializers import RecipeShortSerializer
+from recipes.models import Recipe
+from users.models import Subscription
 
 User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserSerializer):
+    """Создаёт объект юзера."""
     email = serializers.EmailField(
         validators=[
             UniqueValidator(
@@ -33,12 +36,25 @@ class CustomUserCreateSerializer(UserSerializer):
     class Meta:
         model = User
         fields = (
-            'email', 'id', 'username', 'first_name',
-            'last_name', 'is_subscribed',
+            'id', 'email', 'username', 'first_name',
+            'last_name', 'password',
         )
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class CustomUserSerializer(UserSerializer):
+    """Управляет кастомным юзером."""
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -58,57 +74,56 @@ class CustomUserSerializer(UserSerializer):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        return Subscriptions.objects.filter(
+        return Subscription.objects.filter(
             user=request.user, author=obj).exists()
 
 
-class SignUpSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('email', 'username', 'first_name', 'last_name', 'password')
-
-    @staticmethod
-    def validate_username(username):
-        error_names = ('me',)
-        if username in error_names:
-            raise serializers.ValidationError(
-                f"Нельзя использовать имя '{username}'!"
-            )
-        return username
-
-
-class SubscriptionsSerializer(serializers.ModelSerializer):
-    """Создаём подписку."""
-    user = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault()
-    )
-
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        queryset=User.objects.all()
-    )
+class SubscrintionShortSerializer(serializers.ModelSerializer):
+    """Вывод короткого отображение рецепта в подписках."""
+    image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
-        model = Subscriptions
-        fields = ('user', 'author',)
-        validators = (
-            UniqueTogetherValidator(
-                queryset=Subscriptions.objects.all(),
-                message='Вы уже подписаны на этого автора!',
-                fields=['user__author']
-            ),
-        )
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time',)
 
-    def validate(self, data):
-        if self.context['request'].user != data.get('user'):
-            return data
-        raise serializers.ValidationError(
-            'Нельзя подписаться на самого себя!'
-        )
 
-    def to_representation(self, instance):
+class SubscriptionShowSerializer(serializers.ModelSerializer):
+    """ВЫводит авторов на которых подписан юзер и их рецепты"""
+    email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Subscription
+        fields = ('email',
+                  'id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'is_subscribed',
+                  'recipes',
+                  'recipes_count',
+                  )
+
+    def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        context = {'request': request}
-        return RecipeShortSerializer(instance.recipe, context=context).data
+        if not request or request.user.is_anonymous:
+            return False
+        return Subscription.objects.filter(
+            user=request.user, author=obj.author).exists()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        queryset = Recipe.objects.filter(author=obj.author)
+        if limit:
+            queryset = queryset[:int(limit)]
+        return SubscrintionShortSerializer(queryset, many=True).data
+
+    def get_recipes_count(self, obj):
+        return Recipe.objects.filter(author=obj.author).count()

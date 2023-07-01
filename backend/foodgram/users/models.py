@@ -32,11 +32,12 @@ class User(AbstractUser):
     )
     first_name = models.CharField(
         max_length=150,
-        blank=True,
+        blank=False,
         verbose_name='Имя',
     )
     last_name = models.CharField(
-        max_length=150, blank=True,
+        max_length=150,
+        blank=False,
         verbose_name='Фамилия',
     )
     role = models.CharField(
@@ -51,11 +52,15 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
+    @property
+    def is_admin(self):
+        return bool(self.role == ADMIN)
+
     def __str__(self):
         return self.username
 
 
-class Subscriptions(models.Model):
+class Subscription(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -68,6 +73,10 @@ class Subscriptions(models.Model):
         related_name='author',
         verbose_name='Автор',
     )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
 
     def __str__(self):
         return f'Подписка {self.user} на {self.author}'
