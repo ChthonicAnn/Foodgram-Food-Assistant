@@ -120,7 +120,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         shopping_list = '\r\n'.join(
             [(f"{item['name']}: {item['total_amount']} {item['unit']} ")
              for item in ingredients]
-            )
+        )
         filename = f'{request.user.username}_shopping_list.txt'
         response = HttpResponse(shopping_list, content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename={filename}'
