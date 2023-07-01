@@ -30,9 +30,7 @@ class TagSerializer(serializers.ModelSerializer):
             UniqueValidator(
                 message='Данный tag уже существует.',
                 queryset=Tag.objects.all()
-            )
-            ]
-        )
+            )])
 
     class Meta:
         fields = ('id', 'name', 'color', 'slug')
@@ -89,7 +87,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True
-        )
+    )
     image = Base64ImageField(required=False, allow_null=True)
     author = CustomUserSerializer(read_only=True)
     cooking_time = serializers.IntegerField(
@@ -112,7 +110,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 amount=ingredient.get("amount", 15),
                 ingredient=get_object_or_404(Ingredient, id=ingredient["id"]),
                 # ingredient_id=ingredient.get('id'),
-                )
+            )
             for ingredient in ingredients
         ]
         print(create_ingredient)

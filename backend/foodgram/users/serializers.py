@@ -21,9 +21,9 @@ class CustomUserCreateSerializer(UserSerializer):
             UniqueValidator(
                 message='Аккаунт с этим адресом уже существует',
                 queryset=User.objects.all()
-                )
-            ]
-        )
+            )
+        ]
+    )
     username = serializers.CharField(
         validators=[
             UniqueValidator(

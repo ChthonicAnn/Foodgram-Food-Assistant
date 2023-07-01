@@ -21,7 +21,7 @@ class User(AbstractUser):
             RegexValidator(
                 regex=r'^[\w.@+-]+\Z',
                 ),
-        ])
+            ])
     password = models.CharField(
         max_length=150,
         verbose_name='Пароль',

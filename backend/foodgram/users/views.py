@@ -78,7 +78,7 @@ class CustomUserViewSet(UserViewSet):
                 return Response(
                     {'errors': 'Вы больше не подписаны на этого автора'},
                     status=status.HTTP_201_CREATED,
-                    )
+                )
             return Response({'errors': 'Вы не следите за этим автором'},
                             status=status.HTTP_400_BAD_REQUEST
                             )

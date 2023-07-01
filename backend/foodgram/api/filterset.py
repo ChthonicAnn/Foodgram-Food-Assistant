@@ -24,7 +24,7 @@ class RecipeFilter(rest_framework.FilterSet):
         if is_favorited:
             return queryset.filter(
                 favorites__user=self.request.user
-                ).distinct()
+            ).distinct()
         return queryset
 
     def get_is_in_shopping_cart(self, queryset, is_in_shopping_cart):
@@ -36,5 +36,5 @@ class RecipeFilter(rest_framework.FilterSet):
         if is_in_shopping_cart:
             return queryset.filter(
                 favorites__user=self.request.user
-                ).distinct()
+            ).distinct()
         return queryset

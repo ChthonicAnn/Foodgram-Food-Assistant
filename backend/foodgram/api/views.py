@@ -79,7 +79,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 return Response(
                     {'errors': 'Рецепт успешно удален из избранного'},
                     status=status.HTTP_201_CREATED,
-                    )
+                )
             else:
                 return Response({'errors': 'Этот рецепт уже удалён'},
                                 status=status.HTTP_400_BAD_REQUEST,
@@ -107,15 +107,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         ingredients = IngredientInRecipe.objects.filter(
             recipe__in_shopping_list__user=user
-            ).values(
+        ).values(
             'ingredient__name', 'ingredient__measurement_unit'
-            ).annotate(
+        ).annotate(
             name=F('ingredient__name'),
             unit=F('ingredient__measurement_unit'),
             total_amount=Sum('amount')
-            ).order_by(
+        ).order_by(
             '-total_amount'
-            )
+        )
 
         shopping_list = '\r\n'.join(
             [(f"{item['name']}: {item['total_amount']} {item['unit']} ")
