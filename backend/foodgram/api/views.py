@@ -21,9 +21,9 @@ from recipes.models import (
 )
 
 from .serializers import (
-    FavoriteSerializer, IngredientShowSerializer,
+    IngredientShowSerializer,
     RecipeCreateSerializer, RecipeShortSerializer, RecipeShowSerializer,
-    ShoppingCartSerializer, TagSerializer
+    TagSerializer
 )
 
 User = get_user_model()
@@ -49,25 +49,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def post_delete_fav_shop_cart(self, request, pk, model, serializer):
+    def post_delete_fav_shop_cart(self, request, pk, model):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        author = get_object_or_404(User, pk=pk)
+        # author = get_object_or_404(User, pk=pk)
 
         if self.request.method == 'POST':
             model_create = model.objects.filter(user=user, recipe=recipe)
             if not model_create.exists():
-                if request.user != author:
-                    model.objects.create(
-                        user=request.user,
-                        recipe=recipe
-                    )
-                    serializer = RecipeShortSerializer(recipe=recipe)
-                    return Response(
-                        serializer.data,
-                        status=status.HTTP_201_CREATED,
-                    )
-            return Response({'errors': f'Этот рецепт уже добавлен в {model}'},
+                # if request.user != author:
+                model.objects.create(
+                    user=request.user,
+                    recipe=recipe
+                )
+                serializer = RecipeShortSerializer(instance=recipe)
+                # serializer = serializer()
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED,
+                )
+            return Response({'errors': 'Этот рецепт уже был выбран'},
                             status=status.HTTP_204_NO_CONTENT,
                             )
 
@@ -86,38 +87,43 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=('post', 'delete'), url_path='favorite',
             permission_classes=[IsAuthenticated],)
-    def favorite(self, request, pk=None):
+    def favorite(self, request, pk):
         return self.post_delete_fav_shop_cart(
-            request, pk, Favorite, FavoriteSerializer)
+            request, pk, Favorite,)
 
     @action(detail=True, methods=('post', 'delete'), url_path='shopping_cart',
             permission_classes=[IsAuthenticated],)
-    def shopping_cart(self, request, pk=None):
+    def shopping_cart(self, request, pk):
         return self.post_delete_fav_shop_cart(
-            request, pk, ShoppingCart, ShoppingCartSerializer)
+            request, pk, ShoppingCart,)
 
     @action(detail=False, methods=('get',),
             permission_classes=[IsAuthenticated],)
     def download_shopping_cart(self, request):
         user = request.user
 
-        if not user.shopping_cart.exists():
+        if not ShoppingCart.objects.filter(user=user).exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
         ingredients = IngredientInRecipe.objects.filter(
-            recipe__shopping_cart__user=user).values_list(
-            'ingredient__name', 'ingredient__measurement_unit').annotate(
+            recipe__in_shopping_list__user=user
+            ).values(
+            'ingredient__name', 'ingredient__measurement_unit'
+            ).annotate(
             name=F('ingredient__name'),
             unit=F('ingredient__measurement_unit'),
             total_amount=Sum('amount')
-            ).order_by('-total_amount')
+            ).order_by(
+            '-total_amount'
+            )
 
         shopping_list = '\r\n'.join(
-            [(f"{ing['name']}: {ing['total_amount']} {ing['unit']} ")
-             for ing in ingredients]
+            [(f"{item['name']}: {item['total_amount']} {item['unit']} ")
+             for item in ingredients]
             )
-        response = HttpResponse(shopping_list, 'Content-Type: text/plain')
-        response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
+        filename = f'{request.user.username}_shopping_list.txt'
+        response = HttpResponse(shopping_list, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
 
 

@@ -1,21 +1,31 @@
-"""foodgram URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/2.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path, re_path
+from django.views.generic import TemplateView
+from rest_framework.routers import DefaultRouter
+
+from api.views import (
+    IngredientViewSet, RecipeViewSet, TagViewSet,
+)
+from users.views import CustomUserViewSet
+
+
+router_v1 = DefaultRouter()
+router_v1.register('ingredients', IngredientViewSet, basename='ingredients')
+router_v1.register('recipes', RecipeViewSet, basename='recipes')
+router_v1.register('tags', TagViewSet, basename='tags')
+router_v1.register('users', CustomUserViewSet, basename='users')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include(router_v1.urls)),
+    path('api/', include('djoser.urls')),
+    re_path(r'^api/auth/', include('djoser.urls.authtoken')),
+    # path('api/auth/', include('djoser.urls.jwt')),
+    # path('api-token-auth/', views.obtain_auth_token),
+    # path('api/v1/', include('api.urls', namespace='api')),
+    path(
+        'redoc/',
+        TemplateView.as_view(template_name='redoc.html'),
+        name='redoc'
+    ),
 ]
