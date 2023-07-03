@@ -1,6 +1,4 @@
 from django.contrib.auth import get_user_model
-# from django.contrib.auth.tokens import default_token_generator
-# from django.contrib.sites.shortcuts import get_current_site
 from django.db.models import F, Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -19,7 +17,6 @@ from recipes.models import (
     Favorite, Ingredient, IngredientInRecipe,
     Recipe, ShoppingCart, Tag
 )
-
 from .serializers import (
     IngredientShowSerializer,
     RecipeCreateSerializer, RecipeShortSerializer, RecipeShowSerializer,
@@ -31,7 +28,7 @@ User = get_user_model()
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для рецептов."""
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.select_related('recipe', 'author',)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = CustomPagination
@@ -52,18 +49,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def post_delete_fav_shop_cart(self, request, pk, model):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
-        # author = get_object_or_404(User, pk=pk)
 
         if self.request.method == 'POST':
             model_create = model.objects.filter(user=user, recipe=recipe)
             if not model_create.exists():
-                # if request.user != author:
                 model.objects.create(
                     user=request.user,
                     recipe=recipe
                 )
                 serializer = RecipeShortSerializer(instance=recipe)
-                # serializer = serializer()
                 return Response(
                     serializer.data,
                     status=status.HTTP_201_CREATED,
@@ -77,7 +71,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if model_delete.exists():
                 model_delete.delete()
                 return Response(
-                    {'errors': 'Рецепт успешно удален из избранного'},
+                    {'errors': 'Вы больше не следите за этим рецептом'},
                     status=status.HTTP_201_CREATED,
                 )
             else:
@@ -89,13 +83,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=[IsAuthenticated],)
     def favorite(self, request, pk):
         return self.post_delete_fav_shop_cart(
-            request, pk, Favorite,)
+            request, pk, Favorite,
+        )
 
     @action(detail=True, methods=('post', 'delete'), url_path='shopping_cart',
             permission_classes=[IsAuthenticated],)
     def shopping_cart(self, request, pk):
         return self.post_delete_fav_shop_cart(
-            request, pk, ShoppingCart,)
+            request, pk, ShoppingCart,
+        )
 
     @action(detail=False, methods=('get',),
             permission_classes=[IsAuthenticated],)

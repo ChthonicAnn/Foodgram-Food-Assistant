@@ -1,13 +1,9 @@
 from django.contrib.auth import get_user_model
-# from django.contrib.auth.tokens import default_token_generator
-# from django.contrib.auth.models import User
-# from django.shortcuts import get_object_or_404
 from djoser.serializers import UserSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-# from api.serializers import RecipeShortSerializer
 from recipes.models import Recipe
 from users.models import Subscription
 

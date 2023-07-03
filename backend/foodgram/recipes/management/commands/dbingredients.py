@@ -28,5 +28,3 @@ class Command(BaseCommand):
                         )
                 except Exception as error:
                     print(f'Ошибка в строке {row}: {error}')
-
-# encoding='utf=8'

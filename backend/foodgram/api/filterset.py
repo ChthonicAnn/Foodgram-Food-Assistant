@@ -20,7 +20,6 @@ class RecipeFilter(rest_framework.FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        is_favorited = self.request.query_params.get('is_favorited', )
         if is_favorited:
             return queryset.filter(
                 favorites__user=self.request.user
@@ -31,8 +30,6 @@ class RecipeFilter(rest_framework.FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        is_in_shopping_cart = self.request.query_params.get(
-            'is_in_shopping_cart', )
         if is_in_shopping_cart:
             return queryset.filter(
                 favorites__user=self.request.user

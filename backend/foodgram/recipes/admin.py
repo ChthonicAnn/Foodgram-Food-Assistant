@@ -6,10 +6,17 @@ from .models import (
 )
 
 
+class IngredientInRecipeInline(admin.TabularInline):
+    model = IngredientInRecipe
+
+
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'id',)
     list_filter = ('name', 'author', 'tags',)
     empty_value_display = '-пусто-'
+    inlines = [
+        IngredientInRecipeInline,
+    ]
 
 
 class IngredientAdmin(admin.ModelAdmin):

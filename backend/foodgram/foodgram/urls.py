@@ -20,9 +20,6 @@ urlpatterns = [
     path('api/', include(router_v1.urls)),
     path('api/', include('djoser.urls')),
     re_path(r'^api/auth/', include('djoser.urls.authtoken')),
-    # path('api/auth/', include('djoser.urls.jwt')),
-    # path('api-token-auth/', views.obtain_auth_token),
-    # path('api/v1/', include('api.urls', namespace='api')),
     path(
         'redoc/',
         TemplateView.as_view(template_name='redoc.html'),

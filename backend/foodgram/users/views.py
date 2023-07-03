@@ -1,22 +1,15 @@
 from django.contrib.auth import get_user_model
-# from django.contrib.auth.tokens import default_token_generator
-# from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from rest_framework import filters
-# from rest_framework import mixins
-# from rest_framework import permissions
 from rest_framework import response
 from rest_framework import status
-# from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated  # AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.paginators import CustomPagination
-# from api.permissions import (
-#     IsAdminOrAuthorOrReadOnly,  # IsAdmin, IsAdminOrReadOnly,
-# )
+from api.permissions import IsAdminOrAuthorOrReadOnly
 from .models import Subscription
 
 from .serializers import CustomUserSerializer
@@ -28,11 +21,10 @@ User = get_user_model()
 class CustomUserViewSet(UserViewSet):
     """Вьюсет для юзера."""
     queryset = User.objects.all()
-    # lookup_field = 'username'
     serializer_class = CustomUserSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-    # permission_classes = (IsAdminOrAuthorOrReadOnly,)
+    permission_classes = (IsAdminOrAuthorOrReadOnly,)
     pagination_class = CustomPagination
 
     @action(methods=['patch', 'get'], detail=False, url_path='me',
