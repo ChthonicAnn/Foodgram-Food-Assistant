@@ -28,7 +28,7 @@ User = get_user_model()
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для рецептов."""
-    queryset = Recipe.objects.select_related('recipe', 'author',)
+    queryset = Recipe.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = CustomPagination
@@ -62,9 +62,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     serializer.data,
                     status=status.HTTP_201_CREATED,
                 )
-            return Response({'errors': 'Этот рецепт уже был выбран'},
-                            status=status.HTTP_204_NO_CONTENT,
-                            )
+            return Response(
+                {'errors': 'Этот рецепт уже был выбран'},
+                status=status.HTTP_204_NO_CONTENT,
+            )
 
         if self.request.method == 'DELETE':
             model_delete = model.objects.filter(user=user, recipe=recipe)
@@ -75,9 +76,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_201_CREATED,
                 )
             else:
-                return Response({'errors': 'Этот рецепт уже удалён'},
-                                status=status.HTTP_400_BAD_REQUEST,
-                                )
+                return Response(
+                    {'errors': 'Этот рецепт уже удалён'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
     @action(detail=True, methods=('post', 'delete'), url_path='favorite',
             permission_classes=[IsAuthenticated],)
