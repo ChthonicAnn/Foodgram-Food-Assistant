@@ -28,7 +28,7 @@ User = get_user_model()
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для рецептов."""
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.select_related('author',)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     pagination_class = CustomPagination
