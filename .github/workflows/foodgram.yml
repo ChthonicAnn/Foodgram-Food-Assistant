@@ -5,7 +5,7 @@ on: push
 jobs:
 
   tests:
-    name: Testing with flake8
+    name: Test with flake8
     runs-on: ubuntu-latest
 
     steps:
