@@ -83,6 +83,9 @@ jobs:
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             cd foodgram-project-react/infra/
             sudo docker-compose up -d
+            sudo docker exec backend python makemigrations
+            sudo docker exec backend python manage.py migrate --noinput
+            sudo docker exec backend python manage.py createsuperuser
 
   send_message:
     runs-on: ubuntu-latest
