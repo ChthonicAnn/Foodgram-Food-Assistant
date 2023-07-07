@@ -1,6 +1,6 @@
-from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
+from django.db import transaction
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
