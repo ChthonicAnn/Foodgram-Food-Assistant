@@ -13,14 +13,14 @@ from rest_framework.response import Response
 from .filterset import RecipeFilter
 from .paginators import CustomPagination
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
-from recipes.models import (
-    Favorite, Ingredient, IngredientInRecipe,
-    Recipe, ShoppingCart, Tag
-)
 from .serializers import (
     IngredientShowSerializer,
     RecipeCreateSerializer, RecipeShortSerializer, RecipeShowSerializer,
     TagSerializer
+)
+from recipes.models import (
+    Favorite, Ingredient, IngredientInRecipe,
+    Recipe, ShoppingCart, Tag
 )
 
 User = get_user_model()
