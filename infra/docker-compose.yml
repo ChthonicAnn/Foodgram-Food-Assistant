@@ -11,7 +11,7 @@ services:
       - ./.env
 
   backend:
-    image: pearocado/infra-backend:v2.0
+    image: pearocado/infra-backend:latest
     restart: always
     volumes:
       - static_value:/app/static/
