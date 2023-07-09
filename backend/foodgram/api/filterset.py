@@ -33,7 +33,7 @@ class RecipeFilter(FilterSet):
         if is_favorited:
             return queryset.filter(
                 favorite_recipe__user=self.request.user
-            ).distinct()
+            )
         return queryset
 
     def get_is_in_shopping_cart(self, queryset, is_in_shopping_cart):
