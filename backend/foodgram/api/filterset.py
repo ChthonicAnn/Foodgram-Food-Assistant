@@ -1,15 +1,21 @@
 from django_filters.rest_framework import FilterSet, filters
+from rest_framework.filters import SearchFilter
 
 from recipes.models import Ingredient, Recipe
 
 
-class IngredientFilter(FilterSet):
-    """Поиск ингредиентов по имени."""
-    name = filters.CharFilter(lookup_expr="istartswith")
+# class IngredientFilter(FilterSet):
+#     """Поиск ингредиентов по имени."""
+#     name = filters.CharFilter(lookup_expr="istartswith")
 
-    class Meta:
-        model = Ingredient
-        fields = ("name",)
+#     class Meta:
+#         model = Ingredient
+#         fields = ("name",)
+
+class IngredientSearchFilter(SearchFilter):
+    """Поиск ингредиентов по имени."""
+
+    search_param = 'name'
 
 
 class RecipeFilter(FilterSet):
