@@ -31,15 +31,26 @@ class RecipeFilter(FilterSet):
     #         return queryset.filter(favorite_recipe__user=self.request.user)
     #     return queryset
 
-    def get_is_favorited(self, queryset, is_favorited):
+    def get_is_favorited(self, queryset, is_favorited, slug):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
+        is_favorited = self.request.query_params.get('is_favorited', )
         if is_favorited:
             return queryset.filter(
-                recipe__favorites__user=self.request.user
-            )
+                favorites__user=self.request.user
+                ).distinct()
         return queryset
+
+    # def get_is_favorited(self, queryset, is_favorited):
+    #     user = self.request.user
+    #     if not user.is_authenticated:
+    #         return queryset
+    #     if is_favorited:
+    #         return queryset.filter(
+    #             recipe__favorites__user=self.request.user
+    #         )
+    #     return queryset
 
     def get_is_in_shopping_cart(self, queryset, is_in_shopping_cart):
         user = self.request.user
