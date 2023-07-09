@@ -1,19 +1,18 @@
 from django_filters.rest_framework import FilterSet, filters
 
-from recipes.models import Ingredient, Recipe
+from recipes.models import Recipe  #Ingredient
 
 # class IngredientFilter(FilterSet):
 #     """Поиск ингредиентов по имени."""
 
 #     search_param = 'name'
-    
     # name = filters.CharFilter(lookup_expr="istartswith")
 
     # class Meta:
     #     model = Ingredient
     #     fields = ("name",)
 
-class RecipeFilter(rest_framework.FilterSet):
+class RecipeFilter(FilterSet):
     is_favorited = filters.BooleanFilter(method='get_favorite',)
     is_in_shopping_cart = filters.BooleanFilter(
         method='get_is_in_shopping_cart',
