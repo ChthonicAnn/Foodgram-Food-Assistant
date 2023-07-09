@@ -4,14 +4,6 @@ from rest_framework.filters import SearchFilter
 from recipes.models import Recipe
 
 
-# class IngredientFilter(FilterSet):
-#     """Поиск ингредиентов по имени."""
-#     name = filters.CharFilter(lookup_expr="istartswith")
-
-#     class Meta:
-#         model = Ingredient
-#         fields = ("name",)
-
 class IngredientSearchFilter(SearchFilter):
     """Поиск ингредиентов по имени."""
 
