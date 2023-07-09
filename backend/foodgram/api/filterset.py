@@ -43,6 +43,6 @@ class RecipeFilter(FilterSet):
         )
         if is_in_shopping_cart:
             return queryset.filter(
-                shopping_cart__user=self.request.user
+                in_shopping_list__user=self.request.user
             ).distinct()
         return queryset
