@@ -129,9 +129,10 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для ингридиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientShowSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
-    permission_classes = (IsAdminOrReadOnly,)
+    # filter_backends = (filters.SearchFilter,)
+    # search_fields = ('^name',)
+    # permission_classes = (IsAdminOrReadOnly,)
+    filter_class = IngredientFilter
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
