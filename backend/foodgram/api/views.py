@@ -3,14 +3,14 @@ from django.db.models import F, Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
+# from rest_framework import filters
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .filterset import RecipeFilter
+from .filterset import IngredientFilter, RecipeFilter
 from .paginators import CustomPagination
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
 from .serializers import (
