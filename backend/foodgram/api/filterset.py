@@ -35,11 +35,11 @@ class RecipeFilter(FilterSet):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
-        is_favorited = self.request.query_params.get('is_favorited', )
+        is_favorited = self.request.query_params.get('is_favorited',)
         if is_favorited:
             return queryset.filter(
                 favorites__user=self.request.user
-                ).distinct()
+            ).distinct()
         return queryset
 
     # def get_is_favorited(self, queryset, is_favorited):
