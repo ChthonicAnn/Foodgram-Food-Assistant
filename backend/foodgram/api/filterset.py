@@ -1,6 +1,6 @@
 from django_filters.rest_framework import FilterSet, filters
 
-from recipes.models import Recipe  # Ingredient
+from recipes.models import Ingredient, Recipe
 
 
 class IngredientFilter(FilterSet):
@@ -42,7 +42,7 @@ class RecipeFilter(FilterSet):
             return queryset
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart',
-            )
+        )
         if is_in_shopping_cart:
             return queryset.filter(
                 shopping_carts__user=self.request.user
