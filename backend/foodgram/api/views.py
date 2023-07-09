@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .filterset import IngredientFilter, RecipeFilter
+from .filterset import IngredientSearchFilter, RecipeFilter
 from .paginators import CustomPagination
 from .permissions import IsAdminOrReadOnly, IsAdminOrAuthorOrReadOnly
 from .serializers import (
