@@ -3,7 +3,6 @@ from django.db.models import F, Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-# from rest_framework import filters
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -129,12 +128,9 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для ингридиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientShowSerializer
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('^name',)
-    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = [IngredientSearchFilter, ]
     search_fields = ['^name', ]
-    # filter_class = IngredientFilter
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
