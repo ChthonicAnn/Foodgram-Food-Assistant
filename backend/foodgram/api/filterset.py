@@ -2,16 +2,16 @@ from django_filters.rest_framework import FilterSet, filters
 
 from recipes.models import Ingredient, Recipe
 
-class IngredientFilter(FilterSet):
-    """Поиск ингредиентов по имени."""
+# class IngredientFilter(FilterSet):
+#     """Поиск ингредиентов по имени."""
 
-    search_param = 'name'
+#     search_param = 'name'
     
-    name = filters.CharFilter(lookup_expr="istartswith")
+    # name = filters.CharFilter(lookup_expr="istartswith")
 
-    class Meta:
-        model = Ingredient
-        fields = ("name",)
+    # class Meta:
+    #     model = Ingredient
+    #     fields = ("name",)
 
 class RecipeFilter(rest_framework.FilterSet):
     is_favorited = filters.BooleanFilter(method='get_favorite',)
@@ -32,7 +32,7 @@ class RecipeFilter(rest_framework.FilterSet):
             return queryset
         if is_favorited:
             return queryset.filter(
-                favorites_recipe__user=self.request.user
+                favorite_recipe__user=self.request.user
             ).distinct()
         return queryset
 
@@ -42,6 +42,6 @@ class RecipeFilter(rest_framework.FilterSet):
             return queryset
         if is_in_shopping_cart:
             return queryset.filter(
-                favorites__user=self.request.user
+                shopping_cart_recipe__user=self.request.user
             ).distinct()
         return queryset
