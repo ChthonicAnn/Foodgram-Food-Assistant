@@ -14,7 +14,7 @@ from recipes.models import Recipe  # Ingredient
 
 
 class RecipeFilter(FilterSet):
-    is_favorited = filters.BooleanFilter(method='get_favorite',)
+    is_favorited = filters.BooleanFilter(method='get_is_favorited',)
     is_in_shopping_cart = filters.BooleanFilter(
         method='get_is_in_shopping_cart',
     )
@@ -26,15 +26,20 @@ class RecipeFilter(FilterSet):
         model = Recipe
         fields = ('is_favorited', 'is_in_shopping_cart', 'author', 'tags')
 
-    def get_favorite(self, queryset, is_favorited):
-        user = self.request.user
-        if not user.is_authenticated:
-            return queryset
-        if is_favorited:
-            return queryset.filter(
-                favorite_recipe__user=self.request.user
-            )
+    def get_is_favorited(self, queryset, name, data):
+        if data and self.request.user.is_authenticated:
+            return queryset.filter(favorite_recipe__user=self.request.user)
         return queryset
+    
+    # def get_is_favorited(self, queryset, is_favorited):
+    #     user = self.request.user
+    #     if not user.is_authenticated:
+    #         return queryset
+    #     if is_favorited:
+    #         return queryset.filter(
+    #             favorite_recipe__user=self.request.user
+    #         )
+    #     return queryset
 
     def get_is_in_shopping_cart(self, queryset, is_in_shopping_cart):
         user = self.request.user
