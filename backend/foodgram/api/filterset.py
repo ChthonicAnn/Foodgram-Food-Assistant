@@ -1,6 +1,6 @@
 from django_filters.rest_framework import FilterSet, filters
 
-from recipes.models import Recipe  #Ingredient
+from recipes.models import Recipe  # Ingredient
 
 # class IngredientFilter(FilterSet):
 #     """Поиск ингредиентов по имени."""
@@ -11,6 +11,7 @@ from recipes.models import Recipe  #Ingredient
     # class Meta:
     #     model = Ingredient
     #     fields = ("name",)
+
 
 class RecipeFilter(FilterSet):
     is_favorited = filters.BooleanFilter(method='get_favorite',)
