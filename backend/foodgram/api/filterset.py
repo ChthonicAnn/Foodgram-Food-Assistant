@@ -2,15 +2,14 @@ from django_filters.rest_framework import FilterSet, filters
 
 from recipes.models import Recipe  # Ingredient
 
-# class IngredientFilter(FilterSet):
-#     """Поиск ингредиентов по имени."""
 
-#     search_param = 'name'
-    # name = filters.CharFilter(lookup_expr="istartswith")
+class IngredientFilter(FilterSet):
+    """Поиск ингредиентов по имени."""
+    name = filters.CharFilter(lookup_expr="istartswith")
 
-    # class Meta:
-    #     model = Ingredient
-    #     fields = ("name",)
+    class Meta:
+        model = Ingredient
+        fields = ("name",)
 
 
 class RecipeFilter(FilterSet):
@@ -26,11 +25,6 @@ class RecipeFilter(FilterSet):
         model = Recipe
         fields = ('is_favorited', 'is_in_shopping_cart', 'author', 'tags')
 
-    # def get_is_favorited(self, queryset, name, data):
-    #     if data and self.request.user.is_authenticated:
-    #         return queryset.filter(favorite_recipe__user=self.request.user)
-    #     return queryset
-
     def get_is_favorited(self, queryset, is_favorited, slug):
         user = self.request.user
         if not user.is_authenticated:
@@ -42,22 +36,15 @@ class RecipeFilter(FilterSet):
             ).distinct()
         return queryset
 
-    # def get_is_favorited(self, queryset, is_favorited):
-    #     user = self.request.user
-    #     if not user.is_authenticated:
-    #         return queryset
-    #     if is_favorited:
-    #         return queryset.filter(
-    #             recipe__favorites__user=self.request.user
-    #         )
-    #     return queryset
-
-    def get_is_in_shopping_cart(self, queryset, is_in_shopping_cart):
+    def get_is_in_shopping_cart(self, queryset, is_in_shopping_cart, slug):
         user = self.request.user
         if not user.is_authenticated:
             return queryset
+        is_in_shopping_cart = self.request.query_params.get(
+            'is_in_shopping_cart',
+            )
         if is_in_shopping_cart:
             return queryset.filter(
-                shopping_cart_recipe__user=self.request.user
+                shopping_carts__user=self.request.user
             ).distinct()
         return queryset
