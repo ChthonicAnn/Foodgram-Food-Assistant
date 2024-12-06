@@ -191,5 +191,3 @@ docker-compose exec backend python manage.py load_ingredients
 
 ## Об авторе
 [ChthonicAnn](https://github.com/ChthonicAnn/)
-
-http://84.201.172.234/recipes
