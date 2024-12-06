@@ -193,5 +193,6 @@ docker-compose exec backend python manage.py load_tags
 на эндпойнт ```/api/users/```
 2. Пользователь отправляет POST-запрос со своими регистрационными данными ***email password*** на эндпоинт ```/api/token/login/``` , в ответе на запрос ему приходит auth-token. Примечание: При взаимодействии с фронтэндом приложения операция два происходит под капотом при переходе по эндпоинту ```/api/token/login/```.
 
-## Об авторе
-[ChthonicAnn](https://github.com/ChthonicAnn/)
+## Авторы
+
+* **Анастасия Ёрина** - [ChthonicAnn](https://github.com/ChthonicAnn/)
