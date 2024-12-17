@@ -136,7 +136,7 @@ docker-compose exec backend python manage.py createsuperuser
 ```
 При необходимости наполните базу тестовыми данными из backend/data/:
 ```
-docker-compose exec backend python manage.py load_ingredients
+docker-compose exec backend python manage.py dbingredients
 ```
 и
 ```
