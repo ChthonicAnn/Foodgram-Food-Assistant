@@ -138,10 +138,6 @@ docker-compose exec backend python manage.py createsuperuser
 ```
 docker-compose exec backend python manage.py dbingredients
 ```
-и
-```
-docker-compose exec backend python manage.py load_tags
-```
 
 ## Пользовательские роли в проекте
 1. Анонимный пользователь
