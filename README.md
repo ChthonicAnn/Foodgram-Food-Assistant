@@ -134,7 +134,7 @@ docker-compose exec backend python manage.py migrate --noinput
 ```
 docker-compose exec backend python manage.py createsuperuser
 ```
-При необходимости наполните базу тестовыми данными из backend/data/:
+При необходимости наполните базу тестовыми данными из data/:
 ```
 docker-compose exec backend python manage.py dbingredients
 ```
